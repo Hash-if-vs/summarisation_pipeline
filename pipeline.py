@@ -19,6 +19,7 @@ class SummarizationPipeline:
         self.data_loader = DataLoader()
         self.model = SummarizationModel()
         self.evaluator = SummarizationEvaluator()
+        self.visaulizer = SummaryVisualizer()
 
     def run(self, sample_size: int = None):
         """
@@ -47,10 +48,10 @@ class SummarizationPipeline:
         # Evaluate results
         scores = self.evaluator.evaluate_batch(test_summaries, generated_summaries)
         self.evaluator.print_evaluation(scores)
-
-        SummaryVisualizer.display_examples(
+        self.visaulizer.display_examples(
             test_dialogues, test_summaries, generated_summaries
         )
+        self.visaulizer.plot_rouge_scores(scores, "plot/rouge_scores.png")
 
         return scores
 

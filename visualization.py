@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import pandas as pd
-from typing import List, Dict
+import numpy as np
+from typing import Dict, List
 
 
 class SummaryVisualizer:
@@ -9,47 +9,76 @@ class SummaryVisualizer:
     """
 
     @staticmethod
-    def plot_rouge_scores(results: List[Dict], save_path: str = None):
+    def plot_rouge_scores(scores: Dict[str, Dict[str, float]], save_path: str = None):
         """
-        Plot ROUGE scores from tuning results
+        Plot ROUGE scores from evaluation results.
 
         Args:
-            results: List of tuning results from HyperparameterTuner
+            scores: Dictionary of ROUGE scores in format:
+                   {'rouge1': {'precision': 0.8, 'recall': 0.7, 'fmeasure': 0.75}, ...}
             save_path: Optional path to save the figure
         """
-        # Convert to DataFrame for easier plotting
-        df = pd.DataFrame(
-            [
-                {
-                    **r["params"],
-                    **{"rouge1": r["scores"]["rouge1"]["fmeasure"]},
-                    **{"rouge2": r["scores"]["rouge2"]["fmeasure"]},
-                    **{"rougeL": r["scores"]["rougeL"]["fmeasure"]},
-                }
-                for r in results
-            ]
+        if not scores:
+            raise ValueError("No scores provided for visualization")
+
+        metrics = list(scores.keys())
+        x = np.arange(len(metrics))  # the label locations
+        width = 0.25  # the width of the bars
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        # Create bars for each metric type
+        precision_bars = ax.bar(
+            x - width,
+            [scores[m]["precision"] for m in metrics],
+            width,
+            label="Precision",
+            color="#1f77b4",
+        )
+        recall_bars = ax.bar(
+            x,
+            [scores[m]["recall"] for m in metrics],
+            width,
+            label="Recall",
+            color="#ff7f0e",
+        )
+        f1_bars = ax.bar(
+            x + width,
+            [scores[m]["fmeasure"] for m in metrics],
+            width,
+            label="F1",
+            color="#2ca02c",
         )
 
-        # Plot settings
-        plt.figure(figsize=(12, 6))
+        # Add labels and title
+        ax.set_xlabel("ROUGE Metrics")
+        ax.set_ylabel("Scores")
+        ax.set_title("ROUGE Score Comparison")
+        ax.set_xticks(x)
+        ax.set_xticklabels(metrics)
+        ax.legend()
+        ax.set_ylim(0, 1)
+        ax.grid(True, axis="y", linestyle="--", alpha=0.7)
 
-        # Plot each metric
-        for i, metric in enumerate(["rouge1", "rouge2", "rougeL"], 1):
-            plt.subplot(1, 3, i)
-            plt.scatter(
-                df["max_length"], df["num_beams"], c=df[metric], cmap="viridis", s=100
-            )
-            plt.colorbar(label=f"{metric} F1")
-            plt.xlabel("Max Length")
-            plt.ylabel("Num Beams")
-            plt.title(f"{metric.upper()} Scores")
+        # Add value labels on top of each bar
+        for bars in [precision_bars, recall_bars, f1_bars]:
+            for bar in bars:
+                height = bar.get_height()
+                ax.annotate(
+                    f"{height:.3f}",
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                )
 
-        plt.tight_layout()
+        fig.tight_layout()
 
         if save_path:
-            plt.savefig(save_path)
-        else:
-            plt.show()
+            plt.savefig(save_path, bbox_inches="tight")
+
+        plt.show()
 
     @staticmethod
     def display_examples(
@@ -60,12 +89,6 @@ class SummaryVisualizer:
     ):
         """
         Display input-output examples in a formatted way
-
-        Args:
-            dialogues: List of input dialogues
-            references: List of reference summaries
-            predictions: List of predicted summaries
-            num_examples: Number of examples to display
         """
         for i in range(min(num_examples, len(dialogues))):
             print(f"\nExample {i+1}:")
