@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from datasets import load_dataset
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, List
 import logging
 import numpy as np
 from collections import Counter
@@ -20,48 +20,74 @@ class DataLoader:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config.LOG_LEVEL)
-        self.tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
         self.cleaner = DataCleaner() if config.CLEAN_DATA else None
         if config.CLEAN_DATA:
             self.logger.info("Data cleaning enabled")
         else:
             self.logger.info("Data cleaning disabled")
 
-    def load_data(self) -> Dict[str, Tuple]:
+    def load_data(self, sample_size: int = None) -> Dict[str, Tuple]:
         """
-        Load and optionally clean the dataset.
+        Load and optionally clean a subset of the dataset based on the provided sample size.
         """
         self.logger.info("Loading dataset: %s", config.DATASET_NAME)
 
         try:
             dataset = load_dataset(config.DATASET_NAME, trust_remote_code=True)
-            raw_data = {
-                "train": (dataset["train"]["dialogue"], dataset["train"]["summary"]),
-                "test": (dataset["test"]["dialogue"], dataset["test"]["summary"]),
-            }
+
+            # If sample_size is provided, load only the subset of the data
+            if sample_size:
+                data = {
+                    "train": (
+                        dataset["train"]["dialogue"][:sample_size],
+                        dataset["train"]["summary"][:sample_size],
+                    ),
+                    "test": (
+                        dataset["test"]["dialogue"][:sample_size],
+                        dataset["test"]["summary"][:sample_size],
+                    ),
+                }
+            else:
+                # Load full dataset if no sample size is provided
+                data = {
+                    "train": (
+                        dataset["train"]["dialogue"],
+                        dataset["train"]["summary"],
+                    ),
+                    "test": (dataset["test"]["dialogue"], dataset["test"]["summary"]),
+                }
 
             self.logger.info(
                 "Dataset loaded successfully. Train samples: %d, Test samples: %d",
-                len(raw_data["train"][0]),
-                len(raw_data["test"][0]),
+                len(data["train"][0]),
+                len(data["test"][0]),
             )
 
+            # Optionally clean the data
             if config.CLEAN_DATA:
-                return {
-                    "train": self.cleaner.clean_dataset(raw_data["train"]),
-                    "test": self.cleaner.clean_dataset(raw_data["test"]),
-                }
-            return raw_data
+                data["train"] = self.cleaner.clean_dataset(data["train"])
+                data["test"] = self.cleaner.clean_dataset(data["test"])
+
+            return data
 
         except Exception as e:
             self.logger.error("Failed to load dataset: %s", str(e))
             raise
+
+    def clean_subset(
+        self, dialogues: List[str], summaries: List[str]
+    ) -> Tuple[List[str], List[str]]:
+        if not self.cleaner:
+            return dialogues, summaries
+        self.logger.info("Cleaning sample of size %d", len(dialogues))
+        return self.cleaner.clean_dataset((dialogues, summaries))
 
     def analyze_dataset(self, data: Dict[str, Tuple]) -> Dict[str, Dict[str, Any]]:
         """
         Analyze token length distribution of the dataset.
         """
         self.logger.info("Analyzing dataset token distribution")
+        tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
 
         stats = {}
         for split in ["train", "test"]:
@@ -69,11 +95,11 @@ class DataLoader:
 
             # Calculate token lengths
             dialogue_lengths = [
-                len(self.tokenizer.tokenize(dialogue))
+                len(tokenizer.tokenize(dialogue))
                 for dialogue in dialogues[:1000]  # Sample for efficiency
             ]
             summary_lengths = [
-                len(self.tokenizer.tokenize(summary)) for summary in summaries[:1000]
+                len(tokenizer.tokenize(summary)) for summary in summaries[:1000]
             ]
 
             stats[split] = {
@@ -98,13 +124,16 @@ class DataLoader:
             }
 
             self.logger.info(
-                f"{split.capitalize()} set analysis:\n"
-                f"Dialogues - Mean: {stats[split]['dialogues']['mean']:.1f}, "
-                f"Median: {stats[split]['dialogues']['median']}, "
-                f"Mode: {stats[split]['dialogues']['mode']}\n"
-                f"Summaries - Mean: {stats[split]['summaries']['mean']:.1f}, "
-                f"Median: {stats[split]['summaries']['median']}, "
-                f"Mode: {stats[split]['summaries']['mode']}"
+                "%s set analysis:\n"
+                "Dialogues - Mean: %.1f, Median: %d, Mode: %d\n"
+                "Summaries - Mean: %.1f, Median: %d, Mode: %d",
+                split.capitalize(),
+                stats[split]["dialogues"]["mean"],
+                stats[split]["dialogues"]["median"],
+                stats[split]["dialogues"]["mode"],
+                stats[split]["summaries"]["mean"],
+                stats[split]["summaries"]["median"],
+                stats[split]["summaries"]["mode"],
             )
 
         return stats

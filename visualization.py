@@ -3,6 +3,8 @@ import numpy as np
 from typing import Dict, List, Any, Optional
 import logging
 from config import config
+import pandas as pd
+import os
 
 
 class SummaryVisualizer:
@@ -18,98 +20,200 @@ class SummaryVisualizer:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config.LOG_LEVEL)
 
-    def plot_rouge_scores(
-        self, scores: Dict[str, Dict[str, float]], save_path: str = None
-    ):
-        """
-        Plot ROUGE scores from evaluation results.
-
-        Args:
-            scores: Dictionary of ROUGE scores in format:
-                   {'rouge1': {'precision': 0.8, 'recall': 0.7, 'fmeasure': 0.75}, ...}
-            save_path: Optional path to save the figure
-        """
-        if not scores:
-            raise ValueError("No scores provided for visualization")
-
-        metrics = list(scores.keys())
-        x = np.arange(len(metrics))  # the label locations
-        width = 0.25  # the width of the bars
-
-        fig, ax = plt.subplots(figsize=(12, 6))
-
-        # Create bars for each metric type
-        precision_bars = ax.bar(
-            x - width,
-            [scores[m]["precision"] for m in metrics],
-            width,
-            label="Precision",
-            color="#1f77b4",
-        )
-        recall_bars = ax.bar(
-            x,
-            [scores[m]["recall"] for m in metrics],
-            width,
-            label="Recall",
-            color="#ff7f0e",
-        )
-        f1_bars = ax.bar(
-            x + width,
-            [scores[m]["fmeasure"] for m in metrics],
-            width,
-            label="F1",
-            color="#2ca02c",
-        )
-
-        # Add labels and title
-        ax.set_xlabel("ROUGE Metrics")
-        ax.set_ylabel("Scores")
-        ax.set_title("ROUGE Score Comparison")
-        ax.set_xticks(x)
-        ax.set_xticklabels(metrics)
-        ax.legend()
-        ax.set_ylim(0, 1)
-        ax.grid(True, axis="y", linestyle="--", alpha=0.7)
-
-        # Add value labels on top of each bar
-        for bars in [precision_bars, recall_bars, f1_bars]:
-            for bar in bars:
-                height = bar.get_height()
-                ax.annotate(
-                    f"{height:.3f}",
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # 3 points vertical offset
-                    textcoords="offset points",
-                    ha="center",
-                    va="bottom",
-                )
-
-        fig.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, bbox_inches="tight")
-        plt.close()
-
     @staticmethod
     def display_examples(
         dialogues: List[str],
         references: List[str],
         predictions: List[str],
+        data_type: str,
+        sample_size: int,
         num_examples: int = 3,
     ):
         """
         Display input-output examples in a formatted way
         """
-        for i in range(min(num_examples, len(dialogues))):
-            print(f"\nExample {i+1}:")
-            print("=" * 80)
-            print("[Dialogue]:")
-            print(dialogues[i])
-            print("\n[Reference Summary]:")
-            print(references[i])
-            print("\n[Generated Summary]:")
-            print(predictions[i])
-            print("=" * 80)
+        examples_data = []
+        for i in range(min(sample_size, len(dialogues))):
+            if i <= num_examples:
+                print(f"\nExample {i+1}:")
+                print("=" * 80)
+                print("[Dialogue]:")
+                print(dialogues[i])
+                print("\n[Reference Summary]:")
+                print(references[i])
+                print("\n[Generated Summary]:")
+                print(predictions[i])
+                print("=" * 80)
+            examples_data.append(
+                {
+                    "model": config.MODEL_NAME,
+                    "dialogue": dialogues[i],
+                    "reference_summary": references[i],
+                    "generated_summary": predictions[i],
+                    "data_type": data_type,
+                }
+            )
+
+        df = pd.DataFrame(examples_data)
+
+        output_file = f"results/qualitative_analysis.csv"
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+        if os.path.exists(output_file):
+            df.to_csv(output_file, mode="a", header=False, index=False)
+        else:
+            df.to_csv(output_file, index=False)
+
+    def plot_model_comparison(
+        self,
+        final_scores: List[Dict[str, Dict[str, float]]],
+        model_names: List[str],
+        save_path: str = None,
+    ):
+        """
+        Plot comparison of ROUGE scores across different models.
+
+        Args:
+            final_scores: List of score dictionaries for each model
+            model_names: List of model names corresponding to the scores
+            save_path: Optional path to save the figure
+        """
+        if not final_scores or not model_names:
+            raise ValueError("No scores or model names provided for visualization")
+        if len(final_scores) != len(model_names):
+            raise ValueError("Number of scores must match number of model names")
+
+        metrics = ["rouge1", "rouge2", "rougeL"]
+        score_types = ["precision", "recall", "fmeasure"]
+
+        fig, axes = plt.subplots(
+            len(metrics), len(score_types), figsize=(24, 16), sharey=True
+        )
+        fig.suptitle("Model Comparison by ROUGE Metrics", fontsize=18, y=1.03)
+
+        bar_width = 0.5 / len(model_names)
+        x = np.arange(len(model_names))
+
+        # Assign distinct colors per model
+        cmap = plt.get_cmap("tab10")
+        colors = [cmap(i) for i in range(len(model_names))]
+
+        for i, metric in enumerate(metrics):
+            for j, score_type in enumerate(score_types):
+                ax = axes[i, j]
+
+                # Draw bars for each model
+                for k, (model_name, color) in enumerate(zip(model_names, colors)):
+                    value = final_scores[k][metric][score_type]
+                    bar = ax.bar(
+                        j + k * bar_width,  # Use score_type index + offset
+                        value,
+                        width=bar_width,
+                        label=(
+                            model_name if i == 0 and j == 0 else ""
+                        ),  # Only label once
+                        color=color,
+                        alpha=0.8,
+                    )
+
+                    # Value label
+                    ax.text(
+                        j + k * bar_width,
+                        value + 0.01,
+                        f"{value:.3f}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                        rotation=90,
+                    )
+
+                ax.set_title(f"{metric.upper()} - {score_type.capitalize()}")
+                ax.set_ylim(0, 1)
+                ax.grid(True, axis="y", linestyle="--", alpha=0.5)
+                ax.set_xticks([])  # Remove x-axis labels to clean up
+
+        # Add legend below all plots
+        handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in colors]
+        fig.legend(
+            handles,
+            model_names,
+            loc="upper right",
+            bbox_to_anchor=(1.0, 1.0),
+            ncol=1,
+            fontsize=12,
+            borderaxespad=0.1,
+            frameon=True,
+        )
+
+        plt.tight_layout(rect=[0, 0, 0.85, 0.95])
+        if save_path:
+            os.makedirs(
+                os.path.dirname(save_path), exist_ok=True
+            )  # Ensure directory exists
+            plt.savefig(save_path, bbox_inches="tight", dpi=300)
+            self.logger.info(f"Saved model comparison plot to {save_path}")
+
+        plt.close()
+
+    def plot_clean_vs_unclean_comparison(
+        self, results_csv_path: str, save_path: Optional[str] = None
+    ):
+        """
+        Plot a comparison of model performance on clean vs unclean data using subplots per model.
+
+        Args:
+            results_csv_path: Path to CSV containing saved evaluation scores
+            save_path: Optional path to save the generated plot
+        """
+        df = pd.read_csv(results_csv_path)
+
+        # Get list of unique models
+        model_names = df["Model_Name"].unique()
+        metrics = ["ROUGE1", "ROUGE2", "ROUGEL"]
+        score_types = ["P", "R", "F"]
+
+        num_models = len(model_names)
+        fig, axes = plt.subplots(
+            num_models, len(metrics), figsize=(6 * len(metrics), 4 * num_models)
+        )
+
+        if num_models == 1:
+            axes = np.expand_dims(axes, axis=0)  # ensure 2D indexing
+
+        for row_idx, model in enumerate(model_names):
+            model_data = df[df["Model_Name"] == model]
+            for col_idx, metric in enumerate(metrics):
+                ax = axes[row_idx][col_idx]
+                for score_type in score_types:
+                    for data_type in ["Clean", "Unclean"]:
+                        value = model_data[model_data["Data_Type"] == data_type][
+                            f"{metric}_{score_type}"
+                        ].values
+                        if len(value) > 0:
+                            ax.bar(
+                                f"{data_type}_{score_type}",
+                                value[0],
+                                label=f"{data_type} {score_type}",
+                                alpha=0.7,
+                            )
+
+                ax.set_title(f"{model} - {metric}")
+                ax.set_ylim(0, 1)
+                ax.grid(True, axis="y", linestyle="--", alpha=0.5)
+                if col_idx == 0:
+                    ax.set_ylabel("Score")
+
+        handles, labels = ax.get_legend_handles_labels()
+        fig.legend(handles, labels, loc="lower center", ncol=6)
+        fig.suptitle("Model Performance on Clean vs Unclean Data", fontsize=16)
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, bbox_inches="tight", dpi=300)
+            self.logger.info(f"Saved clean vs unclean comparison plot to {save_path}")
+
+        plt.close()
 
 
 class TokenDataVisualizer:
@@ -169,6 +273,9 @@ class TokenDataVisualizer:
         plt.tight_layout()
 
         if save_path:
+            os.makedirs(
+                os.path.dirname(save_path), exist_ok=True
+            )  # Ensure directory exists
             plt.savefig(save_path, dpi=300)
         plt.close()
 
@@ -295,6 +402,9 @@ class TokenDataVisualizer:
         plt.tight_layout()
 
         if save_path:
+            os.makedirs(
+                os.path.dirname(save_path), exist_ok=True
+            )  # Ensure directory exists
             plt.savefig(save_path, bbox_inches="tight", dpi=300)
             self.logger.info(f"Saved statistics plot to {save_path}")
         plt.close()

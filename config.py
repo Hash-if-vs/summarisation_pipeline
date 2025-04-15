@@ -6,7 +6,16 @@ from typing import List
 @dataclass
 class Config:
     # Model configuration
-    MODEL_NAME: str = "philschmid/bart-large-cnn-samsum"
+    MODEL_NAMES: List[str] = field(
+        default_factory=lambda: [
+            "philschmid/distilbart-cnn-12-6-samsum",
+            "philschmid/bart-large-cnn-samsum",
+            "sharmax-vikas/flan-t5-base-samsum",
+            "google/flan-t5-base",
+            "facebook/bart-large",
+        ]
+    )
+    SELECTED_MODEL_INDEX: int = 0
     MAX_INPUT_LENGTH: int = 800
     MAX_OUTPUT_LENGTH: int = 81
     NUM_BEAMS: int = 4
@@ -23,7 +32,13 @@ class Config:
     LOG_LEVEL: int = logging.INFO
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-    CLEAN_DATA = True  # Set to False to disable cleaning
+    CLEAN_DATA: bool = True  # Set to False to disable cleaning
+
+    # This will be set in __post_init__
+    MODEL_NAME: str = ""
+
+    def __post_init__(self):
+        self.MODEL_NAME = self.MODEL_NAMES[self.SELECTED_MODEL_INDEX]
 
 
 config = Config()

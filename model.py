@@ -20,11 +20,12 @@ class SummarizationModel:
         """
         Load the pre-trained model and tokenizer.
         """
-        self.logger.info("Loading model: %s", config.MODEL_NAME)
+        model_name = config.MODEL_NAME
+        self.logger.info("Loading model: %s", model_name)
 
         try:
-            self.tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(config.MODEL_NAME)
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
             # Create a summarization pipeline
             self.summarizer = pipeline(
