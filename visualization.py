@@ -1,15 +1,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Any, Optional
+import logging
+from config import config
 
 
 class SummaryVisualizer:
     """
-    Handles visualization of evaluation results and examples
+    Comprehensive visualization handler for:
+    - Evaluation results (ROUGE scores)
+    - Dataset token distributions
+    - Statistical measures comparison
+    - Example displays
     """
 
-    @staticmethod
-    def plot_rouge_scores(scores: Dict[str, Dict[str, float]], save_path: str = None):
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(config.LOG_LEVEL)
+
+    def plot_rouge_scores(
+        self, scores: Dict[str, Dict[str, float]], save_path: str = None
+    ):
         """
         Plot ROUGE scores from evaluation results.
 
@@ -77,8 +88,7 @@ class SummaryVisualizer:
 
         if save_path:
             plt.savefig(save_path, bbox_inches="tight")
-
-        plt.show()
+        plt.close()
 
     @staticmethod
     def display_examples(
@@ -100,3 +110,191 @@ class SummaryVisualizer:
             print("\n[Generated Summary]:")
             print(predictions[i])
             print("=" * 80)
+
+
+class TokenDataVisualizer:
+    """
+    Handles all visualizations related to token length analysis
+    """
+
+    def __init__(self):
+        self.logger = logging.getLogger(f"{__name__}.TokenDataVisualizer")
+        self.logger.setLevel(config.LOG_LEVEL)
+        self.color_palette = {
+            "train": {"dialogues": "#1f77b4", "summaries": "#2ca02c"},
+            "test": {"dialogues": "#ff7f0e", "summaries": "#d62728"},
+        }
+
+    def plot_token_distributions(
+        self, stats: Dict[str, Dict[str, Any]], save_path: str = None
+    ):
+        """
+        Plot dialogue and summary length distributions
+
+        Args:
+            stats: Dictionary containing token length statistics with raw values
+            save_path: Optional path to save the figure
+        """
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+        # Plot dialogue lengths
+        for split in ["train", "test"]:
+            ax1.hist(
+                stats[split]["dialogues"]["values"],
+                bins=30,
+                alpha=0.6,
+                label=f"{split.capitalize()} Set",
+                edgecolor="white",
+            )
+        ax1.set_title("Dialogue Token Lengths")
+        ax1.set_xlabel("Number of Tokens")
+        ax1.set_ylabel("Frequency")
+        ax1.legend()
+        ax1.grid(alpha=0.3)
+
+        # Plot summary lengths
+        for split in ["train", "test"]:
+            ax2.hist(
+                stats[split]["summaries"]["values"],
+                bins=30,
+                alpha=0.6,
+                label=f"{split.capitalize()} Set",
+                edgecolor="white",
+            )
+        ax2.set_title("Summary Token Lengths")
+        ax2.set_xlabel("Number of Tokens")
+        ax2.legend()
+        ax2.grid(alpha=0.3)
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+        plt.close()
+
+    def plot_statistics(
+        self, stats: Dict[str, Dict[str, Any]], save_path: Optional[str] = None
+    ) -> None:
+        """
+        Plot comparison of statistical measures with exact values and proper legend
+
+        Args:
+            stats: Dictionary containing token length statistics
+            save_path: Optional path to save the figure
+        """
+        plt.figure(figsize=(20, 10))
+
+        metrics = ["mean", "median", "mode", "max", "min", "std"]
+        x = np.arange(len(metrics)) * 2  # Increase spacing between groups
+        width = 0.35
+        y_offset = 0.05  # Vertical offset for text annotations
+
+        ax = plt.axes([0.1, 0.1, 0.7, 0.8])
+        legend_handles = []
+
+        for i, split in enumerate(["train", "test"]):
+            bars = ax.bar(
+                x - width / 2 + i * width,
+                [stats[split]["dialogues"][m] for m in metrics],
+                width,
+                color=self.color_palette[split]["dialogues"],
+                alpha=0.7,
+            )
+
+            if i == 0:
+                legend_handles.append(bars[0])
+
+            for j, bar in enumerate(bars):
+                height = bar.get_height()
+                value = stats[split]["dialogues"][metrics[j]]
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    height + y_offset,
+                    f"{value:.1f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
+
+            bars = ax.bar(
+                x + width / 2 + i * width,
+                [stats[split]["summaries"][m] for m in metrics],
+                width,
+                color=self.color_palette[split]["summaries"],
+                alpha=0.7,
+            )
+
+            if i == 0:
+                legend_handles.append(bars[0])
+
+            for j, bar in enumerate(bars):
+                height = bar.get_height()
+                value = stats[split]["summaries"][metrics[j]]
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    height + y_offset,
+                    f"{value:.1f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
+
+        ax.set_title("Token Length Statistics Comparison (Values Shown Above Bars)")
+        ax.set_xticks(x)
+        ax.set_xticklabels([m.capitalize() for m in metrics])
+        ax.set_ylabel("Token Count")
+        ax.grid(axis="y", alpha=0.3)
+
+        legend_ax = plt.axes([0.82, 0.1, 0.15, 0.8])
+        legend_ax.axis("off")
+
+        legend_labels = [
+            "Train Dialogues",
+            "Train Summaries",
+            "Test Dialogues",
+            "Test Summaries",
+        ]
+        legend_ax.legend(
+            legend_handles
+            + [
+                plt.Rectangle(
+                    (0, 0), 1, 1, fc=self.color_palette["test"]["dialogues"], alpha=0.7
+                ),
+                plt.Rectangle(
+                    (0, 0), 1, 1, fc=self.color_palette["test"]["summaries"], alpha=0.7
+                ),
+            ],
+            legend_labels,
+            loc="upper left",
+            framealpha=0.7,
+        )
+
+        # Replacing symbolic representations with full words
+        stats_text = ["Statistics Summary:"]
+        for split in ["train", "test"]:
+            stats_text.append(f"\n{split.capitalize()} Set:")
+            stats_text.append(f"Dialogues (Mean / Median / Mode/ Max/ Min/ SD):")
+            stats_text.append(
+                f"{stats[split]['dialogues']['mean']:.1f} / {stats[split]['dialogues']['median']:.1f} / {stats[split]['dialogues']['mode']}/ {stats[split]['dialogues']['max']}/ {stats[split]['dialogues']['min']}/ {stats[split]['dialogues']['std']:.1f}"
+            )
+            stats_text.append(f"Summaries (Mean / Median / Mode/ Max/ Min/ SD):")
+            stats_text.append(
+                f"{stats[split]['summaries']['mean']:.1f} / {stats[split]['summaries']['median']:.1f} / {stats[split]['summaries']['mode']}/ {stats[split]['summaries']['max']}/ {stats[split]['summaries']['min']}/ {stats[split]['summaries']['std']:.1f}"
+            )
+
+        legend_ax.text(
+            0,
+            0.5,
+            "\n".join(stats_text),
+            ha="left",
+            va="center",
+            fontfamily="monospace",
+            bbox=dict(facecolor="white", alpha=0.7),
+        )
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, bbox_inches="tight", dpi=300)
+            self.logger.info(f"Saved statistics plot to {save_path}")
+        plt.close()

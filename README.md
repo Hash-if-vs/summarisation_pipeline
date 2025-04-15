@@ -1,5 +1,5 @@
 
-```markdown
+
 # Modular Text Summarization Pipeline
 
 A production-ready text summarization system using self-hosted LLMs with modular components for data loading, model inference, and evaluation.

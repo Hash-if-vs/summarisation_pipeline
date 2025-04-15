@@ -51,7 +51,7 @@ class SummarizationPipeline:
         self.visaulizer.display_examples(
             test_dialogues, test_summaries, generated_summaries
         )
-        self.visaulizer.plot_rouge_scores(scores, "plot/rouge_scores.png")
+        self.visaulizer.plot_rouge_scores(scores, "plots/rouge_scores.png")
 
         return scores
 

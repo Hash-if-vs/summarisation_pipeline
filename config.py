@@ -7,8 +7,8 @@ from typing import List
 class Config:
     # Model configuration
     MODEL_NAME: str = "philschmid/bart-large-cnn-samsum"
-    MAX_INPUT_LENGTH: int = 1024
-    MAX_OUTPUT_LENGTH: int = 128
+    MAX_INPUT_LENGTH: int = 800
+    MAX_OUTPUT_LENGTH: int = 81
     NUM_BEAMS: int = 4
 
     # Data configuration
@@ -22,6 +22,8 @@ class Config:
     # Logging configuration
     LOG_LEVEL: int = logging.INFO
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+    CLEAN_DATA = True  # Set to False to disable cleaning
 
 
 config = Config()
