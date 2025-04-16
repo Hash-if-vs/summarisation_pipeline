@@ -126,7 +126,8 @@ The script will:
 -   Generate summaries for each model on the test set (or a sample if modified).
 -   Calculate and print ROUGE scores for each model and data condition.
 -   Save detailed scores to `results/summarization_scores.csv`.
--   Save comparison plots to the `plots/` directory.
+-   Save comparison plots and token distribution plots to the `plots/` directory.
+-   Save token distribution data to `plots/` after inference.
 -   Print final formatted results to the console.
 
 *Note: The `pipeline.run()` method in `main.py` currently uses a default `sample_size=500`. Modify this in `main.py` if you want to run on the full dataset (set to `None`) or a different sample size.*
