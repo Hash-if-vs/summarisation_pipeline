@@ -202,7 +202,7 @@ This project includes a custom fine-tuned BART model on the SAMSum dataset. The 
 
 ### Running the Fine-Tuning Notebook
 
-1. Open the `notebooks/finetune_summarisation.ipynb` file in Google Colab.
+1. Download and open the `notebooks/finetune_summarisation.ipynb` file in Google Colab.(The preview is disabled due to some widget error, but you can open it in google colab)
 2. Obtain your API token from [Hugging Face](https://huggingface.co/settings/tokens).
 3. Add the token to Colab secrets:
     - In the Colab interface, go to the **Sidebar** on the left.
