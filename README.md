@@ -2,7 +2,7 @@
 
 This project provides a modular pipeline for evaluating and comparing different text summarization models using the Hugging Face ecosystem. It allows for data loading, optional cleaning, model inference, evaluation using ROUGE metrics, and visualization of results.
 
-**A detailed report of this project is available in the file [`results/summarisation_pipeline.pdf`](results/summarisation_pipeline.pdf).**
+**A detailed report of this project is available in the file [`results/summarisation_pipeline.pdf`](resources/summarisation_pipeline.pdf).**
 
 ## Features
 
@@ -186,15 +186,15 @@ python data_loader.py
 ### Sample Outputs
 
 The script generates the following outputs in the `plots/` directory:
-- **Token Length Distributions**: `plots/token_distributions.png`
-- **Clean vs. Unclean Data Comparison**: Plots showing the effect of data cleaning.
+- **Token Length Distributions**: Token length distributions
+- **Clean vs. Unclean Data Comparison**: Comparison of matrices across clean and raw data.
 
 Example output:
 - **Token Length Distribution Plot**:
-  ![Token Length Distribution](plots/clean/clean_token_distributions.png)
+  ![Token Length Distribution](resources/figures/clean_token_distributions.png)
 
 - **Clean vs. Unclean Data Comparison**:
-  ![Clean vs. Unclean Data](plots/clean_vs_unclean_model_performance_comparison.png)
+  ![Clean vs. Unclean Data](resources/figures/clean_vs_unclean_model_performance_comparison.png)
 
 ## Fine-Tuning a Custom BART Model
 
