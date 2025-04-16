@@ -95,7 +95,7 @@ The pipeline follows a clear sequence:
     pip install -r requirements.txt
     ```
 
-4.  **Install the `en_core_web_sm` model for spaCy (if required):**
+4.  **Install the `en_core_web_sm` model for spaCy :**
     ```bash
     python -m spacy download en_core_web_sm
     ```
