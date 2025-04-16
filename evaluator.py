@@ -75,7 +75,7 @@ class SummarizationEvaluator:
 if __name__ == "__main__":
     evaluator = SummarizationEvaluator()
     # Example usage
-    references = ["This is a reference summary."]
-    predictions = ["This is a predicted summary."]
-    scores = evaluator.evaluate_batch(references, predictions)
-    evaluator.print_evaluation(scores)
+    input_references = ["This is a reference summary."]
+    generated_predictions = ["This is a predicted summary."]
+    generated_scores = evaluator.evaluate_batch(input_references, generated_predictions)
+    evaluator.print_evaluation(generated_scores)

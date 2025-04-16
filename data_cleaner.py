@@ -55,12 +55,12 @@ class DataCleaner:
         """
         dialogues, summaries = data
 
-        self.logger.info(f"Cleaning dataset (size: {len(dialogues)})")
+        self.logger.info("Cleaning dataset (size: %d)", len(dialogues))
         cleaned_dialogues = [self.clean_dialogue(d) for d in dialogues]
         cleaned_summaries = [self.clean_summary(s) for s in summaries]
 
         # Log sample cleaning results
-        self.logger.debug(f"Original dialogue sample: {dialogues[0][:100]}...")
-        self.logger.debug(f"Cleaned dialogue sample: {cleaned_dialogues[0][:100]}...")
+        self.logger.debug("Original dialogue sample: %s...", dialogues[0][:100])
+        self.logger.debug("Cleaned dialogue sample: %s...", cleaned_dialogues[0][:100])
 
         return cleaned_dialogues, cleaned_summaries

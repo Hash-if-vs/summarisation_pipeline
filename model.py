@@ -2,15 +2,6 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 import logging
 from typing import List
 from config import config
-import os
-import torch
-
-if torch.cuda.is_available():
-    # Set the device to GPU if available
-    print("cuda")
-else:
-    print("cpu")  # Assuming you want to use the first GPU
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 
 class SummarizationModel:

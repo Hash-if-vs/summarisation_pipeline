@@ -1,6 +1,3 @@
-from dotenv import load_dotenv
-
-load_dotenv()
 from datasets import load_dataset
 from typing import Dict, Tuple, Any, List
 import logging
@@ -201,24 +198,25 @@ class DataLoader:
 if __name__ == "__main__":
     for clean_flag in [False, True]:
         config.CLEAN_DATA = clean_flag
-        label = "clean" if clean_flag else "unclean"
-        print(f"\nProcessing {label} data...")
+        data_type = "clean" if clean_flag else "unclean"
+        print(f"\nProcessing {data_type} data...")
 
         # Load and analyze data
         data_loader = DataLoader()
-        data = data_loader.load_data(sample_size=1000)
-        stats = data_loader.analyze_dataset(data, label)
+        loaded_data = data_loader.load_data(sample_size=1000)
+        computed_stats = data_loader.analyze_dataset(loaded_data, data_type)
 
         # Save visualizations
         visualizer = TokenDataVisualizer()
         visualizer.plot_token_distributions(
-            stats, save_path=f"plots/{label}/{label}_token_distributions.png"
+            computed_stats, save_path=f"plots/{type}/{type}_token_distributions.png"
         )
         visualizer.plot_statistics(
-            stats, save_path=f"plots/{label}/{label}_statistical_comparison.png"
+            computed_stats,
+            save_path=f"plots/{data_type}/{data_type}_statistical_comparison.png",
         )
 
         # Sample preview and stats
-        print(f"\nSample dialogue ({label}):", data["train"][0][0])
-        print(f"Sample summary ({label}):", data["train"][1][0])
-        print(f"\nTraining set statistics ({label}):", stats["train"])
+        print(f"\nSample dialogue ({data_type}):", loaded_data["train"][0][0])
+        print(f"Sample summary ({data_type}):", loaded_data["train"][1][0])
+        print(f"\nTraining set statistics ({data_type}):", computed_stats["train"])

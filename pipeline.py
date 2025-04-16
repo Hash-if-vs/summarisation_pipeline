@@ -64,7 +64,10 @@ class SummarizationPipeline:
         df = pd.DataFrame([flat_row])
         df.to_csv(self.results_filepath, mode="a", header=False, index=False)
         self.logger.info(
-            f"Appended results for {result_row['Model_Name']} ({result_row['Data_Type']}) to {self.results_filepath}"
+            "Appended results for %s (%s) to %s",
+            result_row["Model_Name"],
+            result_row["Data_Type"],
+            self.results_filepath,
         )
 
     def run(self, sample_size: int = None):
@@ -76,7 +79,7 @@ class SummarizationPipeline:
 
         for clean_flag in [True, False]:
             data_type = "Clean" if clean_flag else "Unclean"
-            self.logger.info(f"\n\n--- Running with {data_type} Data ---\n")
+            self.logger.info("\n\n--- Running with %s Data ---\n", data_type)
             config.CLEAN_DATA = clean_flag
             data = self.data_loader.load_data(sample_size)
             dialogues, summaries = data["test"]

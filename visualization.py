@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from typing import Dict, List, Any, Optional
 import logging
 from config import config
@@ -94,7 +93,7 @@ class SummaryVisualizer:
         fig.suptitle("Model Comparison by ROUGE Metrics", fontsize=18, y=1.03)
 
         bar_width = 0.5 / len(model_names)
-        x = np.arange(len(model_names))
+        _x = np.arange(len(model_names))
 
         # Assign distinct colors per model
         cmap = plt.get_cmap("tab10")
@@ -107,7 +106,7 @@ class SummaryVisualizer:
                 # Draw bars for each model
                 for k, (model_name, color) in enumerate(zip(model_names, colors)):
                     value = final_scores[k][metric][score_type]
-                    bar = ax.bar(
+                    _bar = ax.bar(
                         j + k * bar_width,  # Use score_type index + offset
                         value,
                         width=bar_width,
@@ -153,7 +152,7 @@ class SummaryVisualizer:
                 os.path.dirname(save_path), exist_ok=True
             )  # Ensure directory exists
             plt.savefig(save_path, bbox_inches="tight", dpi=300)
-            self.logger.info(f"Saved model comparison plot to {save_path}")
+            self.logger.info("Saved model comparison plot to %s", save_path)
 
         plt.close()
 
@@ -213,7 +212,7 @@ class SummaryVisualizer:
         if save_path:
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             plt.savefig(save_path, bbox_inches="tight", dpi=300)
-            self.logger.info(f"Saved clean vs unclean comparison plot to {save_path}")
+            self.logger.info("Saved clean vs unclean comparison plot to %s", save_path)
 
         plt.close()
 
@@ -241,7 +240,7 @@ class TokenDataVisualizer:
             stats: Dictionary containing token length statistics with raw values
             save_path: Optional path to save the figure
         """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+        _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
         # Plot dialogue lengths
         for split in ["train", "test"]:
@@ -382,11 +381,11 @@ class TokenDataVisualizer:
         stats_text = ["Statistics Summary:"]
         for split in ["train", "test"]:
             stats_text.append(f"\n{split.capitalize()} Set:")
-            stats_text.append(f"Dialogues (Mean / Median / Mode/ Max/ Min/ SD):")
+            stats_text.append("Dialogues (Mean / Median / Mode/ Max/ Min/ SD):")
             stats_text.append(
                 f"{stats[split]['dialogues']['mean']:.1f} / {stats[split]['dialogues']['median']:.1f} / {stats[split]['dialogues']['mode']}/ {stats[split]['dialogues']['max']}/ {stats[split]['dialogues']['min']}/ {stats[split]['dialogues']['std']:.1f}"
             )
-            stats_text.append(f"Summaries (Mean / Median / Mode/ Max/ Min/ SD):")
+            stats_text.append("Summaries (Mean / Median / Mode/ Max/ Min/ SD):")
             stats_text.append(
                 f"{stats[split]['summaries']['mean']:.1f} / {stats[split]['summaries']['median']:.1f} / {stats[split]['summaries']['mode']}/ {stats[split]['summaries']['max']}/ {stats[split]['summaries']['min']}/ {stats[split]['summaries']['std']:.1f}"
             )
@@ -408,7 +407,7 @@ class TokenDataVisualizer:
                 os.path.dirname(save_path), exist_ok=True
             )  # Ensure directory exists
             plt.savefig(save_path, bbox_inches="tight", dpi=300)
-            self.logger.info(f"Saved statistics plot to {save_path}")
+            self.logger.info("Saved statistics plot to %s", save_path)
         plt.close()
 
     def plot_token_distributions_post_inference(
@@ -426,7 +425,7 @@ class TokenDataVisualizer:
         def plot_distributions(df: pd.DataFrame, title_prefix: str, filename: str):
             models = df["model"].unique()
             n_models = len(models)
-            fig, axs = plt.subplots(
+            _fig, axs = plt.subplots(
                 n_models, 1, figsize=(12, 4 * n_models), sharex=True
             )
             if n_models == 1:
