@@ -2,6 +2,8 @@
 
 This project provides a modular pipeline for evaluating and comparing different text summarization models using the Hugging Face ecosystem. It allows for data loading, optional cleaning, model inference, evaluation using ROUGE metrics, and visualization of results.
 
+**A detailed report of this project is available in the file [`results/summarisation_pipeline.pdf`](results/summarisation_pipeline.pdf).**
+
 ## Features
 
 -   **Multiple Model Comparison**: Evaluate and compare several pre-trained summarization models from Hugging Face Hub (configurable in `config.py`).
