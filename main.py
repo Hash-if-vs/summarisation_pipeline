@@ -44,7 +44,7 @@ def main():
 
     try:
         pipeline = SummarizationPipeline()
-        results = pipeline.run(sample_size=300)
+        results = pipeline.run(sample_size=3)
         print_results(results)
     except Exception as e:
         logging.error("Pipeline failed: %s", str(e))

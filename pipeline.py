@@ -4,7 +4,7 @@ from model import SummarizationModel
 from evaluator import SummarizationEvaluator
 from config import config
 import pandas as pd
-from visualization import SummaryVisualizer
+from visualization import SummaryVisualizer, TokenDataVisualizer
 import os
 
 
@@ -20,8 +20,12 @@ class SummarizationPipeline:
         self.model = SummarizationModel()
         self.evaluator = SummarizationEvaluator()
         self.visualizer = SummaryVisualizer()
+        self.token_visualizer = TokenDataVisualizer()
         self.results_filepath = "results/summarization_scores.csv"
-
+        self.qualitative_results_filepath = "results/clean_qualitative_analysis.csv"
+        self.unclean_qualitative_results_filepath = (
+            "results/unclean_qualitative_analysis.csv"
+        )
         # Initialize results file with header if it doesn't exist
         if not os.path.exists(self.results_filepath):
             os.makedirs(os.path.dirname(self.results_filepath), exist_ok=True)
@@ -114,6 +118,12 @@ class SummarizationPipeline:
         self.visualizer.plot_clean_vs_unclean_comparison(
             results_csv_path=self.results_filepath,
             save_path="plots/clean_vs_unclean_model_performance_comparison.png",
+        )
+        # plot token distributions
+        clean_df = pd.read_csv(self.qualitative_results_filepath)
+        unclean_df = pd.read_csv(self.unclean_qualitative_results_filepath)
+        self.token_visualizer.plot_token_distributions_post_inference(
+            clean_df, unclean_df, save_dir="plots/token_distributions/"
         )
 
         return all_results

@@ -5,6 +5,8 @@ import logging
 from config import config
 import pandas as pd
 import os
+import seaborn as sns
+import numpy as np
 
 
 class SummaryVisualizer:
@@ -408,3 +410,73 @@ class TokenDataVisualizer:
             plt.savefig(save_path, bbox_inches="tight", dpi=300)
             self.logger.info(f"Saved statistics plot to {save_path}")
         plt.close()
+
+    def plot_token_distributions_post_inference(
+        self, clean_df: pd.DataFrame, unclean_df: pd.DataFrame, save_dir: str = None
+    ):
+        """
+        Plots summary length distributions for each model and data type (clean/unclean).
+
+        Args:
+            clean_df (pd.DataFrame): DataFrame with clean data. Should have columns: 'Model', 'Generated Summary', 'Reference Summary'
+            unclean_df (pd.DataFrame): DataFrame with unclean data. Same structure as clean_df.
+            save_dir (str): Directory to save the plots. Plots will be saved as PNGs named by data type.
+        """
+
+        def plot_distributions(df: pd.DataFrame, title_prefix: str, filename: str):
+            models = df["model"].unique()
+            n_models = len(models)
+            fig, axs = plt.subplots(
+                n_models, 1, figsize=(12, 4 * n_models), sharex=True
+            )
+            if n_models == 1:
+                axs = [axs]
+
+            for i, model in enumerate(models):
+                model_df = df[df["model"] == model]
+                gen_lens = model_df["generated_summary"].apply(
+                    lambda x: len(str(x).split())
+                )
+                ref_lens = model_df["reference_summary"].apply(
+                    lambda x: len(str(x).split())
+                )
+
+                sns.histplot(
+                    gen_lens,
+                    color="blue",
+                    label="Generated",
+                    kde=True,
+                    bins=30,
+                    ax=axs[i],
+                    alpha=0.5,
+                )
+                sns.histplot(
+                    ref_lens,
+                    color="green",
+                    label="Reference",
+                    kde=True,
+                    bins=30,
+                    ax=axs[i],
+                    alpha=0.5,
+                )
+
+                axs[i].set_title(f"{title_prefix}: {model}")
+                axs[i].set_xlabel("Number of Tokens")
+                axs[i].set_ylabel("Frequency")
+                axs[i].legend()
+                axs[i].grid(alpha=0.3)
+
+            plt.tight_layout()
+            if save_dir:
+                os.makedirs(save_dir, exist_ok=True)
+                plt.savefig(os.path.join(save_dir, filename), dpi=300)
+            plt.close()
+
+        plot_distributions(
+            clean_df, "Clean Data", "clean_token_distributions_post_inference.png"
+        )
+        plot_distributions(
+            unclean_df,
+            "Unclean Data",
+            "unclean_token_distributions_post_inference.png",
+        )
