@@ -98,13 +98,6 @@ The pipeline follows a clear sequence:
     python -m spacy download en_core_web_sm
     ```
 
-5.  **(Optional) Create `.env` file:** If your models require authentication or you use specific environment variables, create a `.env` file in the root directory:
-    ```env
-    # Example: If using private models
-    # HUGGING_FACE_HUB_TOKEN=your_hf_token
-    ```
-    The `data_loader.py` uses `python-dotenv` to load these variables.
-
 ## Configuration
 
 Modify `config.py` to customize the pipeline:
@@ -135,6 +128,25 @@ The script will:
 -   Print final formatted results to the console.
 
 *Note: The `pipeline.run()` method in `main.py` currently uses a default `sample_size=500`. Modify this in `main.py` if you want to run on the full dataset (set to `None`) or a different sample size.*
+
+## Summarization Scores
+
+The table below shows the ROUGE scores for different models on both clean and unclean data:
+
+| Data Type | Model Name                              | ROUGE-1 Precision | ROUGE-1 Recall | ROUGE-1 F1 | ROUGE-2 Precision | ROUGE-2 Recall | ROUGE-2 F1 | ROUGE-L Precision | ROUGE-L Recall | ROUGE-L F1 |
+|-----------|-----------------------------------------|-------------------|----------------|------------|-------------------|----------------|------------|-------------------|----------------|------------|
+| Clean     | Hashif/bart-samsum                     | 0.3658            | 0.5198         | 0.4132     | 0.1275            | 0.2207         | 0.1570     | 0.2866            | 0.4216         | 0.3285     |
+| Clean     | philschmid/distilbart-cnn-12-6-samsum  | 0.3368            | 0.4702         | 0.3821     | 0.1084            | 0.1780         | 0.1322     | 0.2358            | 0.3304         | 0.2685     |
+| Clean     | philschmid/bart-large-cnn-samsum       | 0.3580            | 0.4911         | 0.3983     | 0.0897            | 0.1657         | 0.1155     | 0.2226            | 0.3185         | 0.2533     |
+| Clean     | sharmax-vikas/flan-t5-base-samsum      | 0.2395            | 0.2708         | 0.2432     | 0.0452            | 0.0568         | 0.0481     | 0.1869            | 0.2351         | 0.2006     |
+| Clean     | google/flan-t5-base                    | 0.2719            | 0.4236         | 0.3277     | 0.0752            | 0.1354         | 0.0959     | 0.2372            | 0.3790         | 0.2887     |
+| Clean     | facebook/bart-large                    | 0.1416            | 0.5615         | 0.2222     | 0.0251            | 0.1354         | 0.0422     | 0.1124            | 0.4563         | 0.1773     |
+| Unclean   | Hashif/bart-samsum                     | 0.3347            | 0.5386         | 0.4036     | 0.1209            | 0.2382         | 0.1587     | 0.3002            | 0.5041         | 0.3692     |
+| Unclean   | philschmid/distilbart-cnn-12-6-samsum  | 0.3632            | 0.5153         | 0.4162     | 0.0970            | 0.1511         | 0.1158     | 0.2692            | 0.3836         | 0.3091     |
+| Unclean   | philschmid/bart-large-cnn-samsum       | 0.3560            | 0.4966         | 0.4065     | 0.1021            | 0.1672         | 0.1247     | 0.2680            | 0.3906         | 0.3121     |
+| Unclean   | sharmax-vikas/flan-t5-base-samsum      | 0.3141            | 0.5364         | 0.3835     | 0.1389            | 0.2907         | 0.1857     | 0.2756            | 0.5019         | 0.3472     |
+| Unclean   | google/flan-t5-base                    | 0.3420            | 0.5802         | 0.4111     | 0.1315            | 0.2723         | 0.1717     | 0.2812            | 0.5041         | 0.3462     |
+| Unclean   | facebook/bart-large                    | 0.4464            | 0.1894         | 0.2504     | 0.0667            | 0.0444         | 0.0533     | 0.4161            | 0.1686         | 0.2257     |
 
 ## Qualitative Analysis
 
