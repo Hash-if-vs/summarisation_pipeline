@@ -10,6 +10,8 @@ from transformers import AutoTokenizer
 from config import config
 from data_cleaner import DataCleaner
 from visualization import TokenDataVisualizer
+import pandas as pd
+import os
 
 
 class DataLoader:
@@ -82,74 +84,141 @@ class DataLoader:
         self.logger.info("Cleaning sample of size %d", len(dialogues))
         return self.cleaner.clean_dataset((dialogues, summaries))
 
-    def analyze_dataset(self, data: Dict[str, Tuple]) -> Dict[str, Dict[str, Any]]:
+    def analyze_dataset(
+        self, data: Dict[str, Tuple], label: str
+    ) -> Dict[str, Dict[str, Any]]:
         """
-        Analyze token length distribution of the dataset.
+        Analyze token length distribution of the dataset and save statistics to a shared CSV file.
         """
-        self.logger.info("Analyzing dataset token distribution")
+        self.logger.info("Analyzing dataset token distribution (%s)", label)
         tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
 
         stats = {}
+        rows = []
+
         for split in ["train", "test"]:
             dialogues, summaries = data[split]
 
-            # Calculate token lengths
-            dialogue_lengths = [
-                len(tokenizer.tokenize(dialogue))
-                for dialogue in dialogues[:1000]  # Sample for efficiency
-            ]
-            summary_lengths = [
-                len(tokenizer.tokenize(summary)) for summary in summaries[:1000]
-            ]
+            # Tokenize and compute lengths
+            dialogue_lengths = [len(tokenizer.tokenize(d)) for d in dialogues]
+            summary_lengths = [len(tokenizer.tokenize(s)) for s in summaries]
 
-            stats[split] = {
-                "dialogues": {
-                    "mean": np.mean(dialogue_lengths),
-                    "median": np.median(dialogue_lengths),
-                    "mode": Counter(dialogue_lengths).most_common(1)[0][0],
-                    "max": max(dialogue_lengths),
-                    "min": min(dialogue_lengths),
-                    "std": np.std(dialogue_lengths),
-                    "values": dialogue_lengths,
-                },
-                "summaries": {
-                    "mean": np.mean(summary_lengths),
-                    "median": np.median(summary_lengths),
-                    "mode": Counter(summary_lengths).most_common(1)[0][0],
-                    "max": max(summary_lengths),
-                    "min": min(summary_lengths),
-                    "std": np.std(summary_lengths),
-                    "values": summary_lengths,
-                },
+            # Compute stats
+            dialogue_stats = {
+                "mean": np.mean(dialogue_lengths),
+                "median": np.median(dialogue_lengths),
+                "mode": Counter(dialogue_lengths).most_common(1)[0][0],
+                "max": max(dialogue_lengths),
+                "min": min(dialogue_lengths),
+                "std": np.std(dialogue_lengths),
+                "values": dialogue_lengths,
+            }
+            summary_stats = {
+                "mean": np.mean(summary_lengths),
+                "median": np.median(summary_lengths),
+                "mode": Counter(summary_lengths).most_common(1)[0][0],
+                "max": max(summary_lengths),
+                "min": min(summary_lengths),
+                "std": np.std(summary_lengths),
+                "values": summary_lengths,
             }
 
+            stats[split] = {
+                "dialogues": dialogue_stats,
+                "summaries": summary_stats,
+            }
+
+            # Add to CSV row format with label
+            rows.append(
+                [
+                    label,
+                    split,
+                    "dialogues",
+                    dialogue_stats["mean"],
+                    dialogue_stats["median"],
+                    dialogue_stats["mode"],
+                    dialogue_stats["max"],
+                    dialogue_stats["min"],
+                    dialogue_stats["std"],
+                ]
+            )
+            rows.append(
+                [
+                    label,
+                    split,
+                    "summaries",
+                    summary_stats["mean"],
+                    summary_stats["median"],
+                    summary_stats["mode"],
+                    summary_stats["max"],
+                    summary_stats["min"],
+                    summary_stats["std"],
+                ]
+            )
+
             self.logger.info(
-                "%s set analysis:\n"
+                "%s set analysis (%s):\n"
                 "Dialogues - Mean: %.1f, Median: %d, Mode: %d\n"
                 "Summaries - Mean: %.1f, Median: %d, Mode: %d",
                 split.capitalize(),
-                stats[split]["dialogues"]["mean"],
-                stats[split]["dialogues"]["median"],
-                stats[split]["dialogues"]["mode"],
-                stats[split]["summaries"]["mean"],
-                stats[split]["summaries"]["median"],
-                stats[split]["summaries"]["mode"],
+                label,
+                dialogue_stats["mean"],
+                dialogue_stats["median"],
+                dialogue_stats["mode"],
+                summary_stats["mean"],
+                summary_stats["median"],
+                summary_stats["mode"],
             )
+
+        # Save or append to CSV
+        df = pd.DataFrame(
+            rows,
+            columns=[
+                "Label",
+                "Split",
+                "Section",
+                "Mean",
+                "Median",
+                "Mode",
+                "Max",
+                "Min",
+                "Std Dev",
+            ],
+        )
+        csv_path = "results/dataset_stats.csv"
+        if os.path.exists(csv_path):
+            df.to_csv(
+                csv_path, mode="a", index=False, header=False
+            )  # append without header
+        else:
+            df.to_csv(csv_path, index=False)  # create new with header
+
+        self.logger.info("Saved token stats to dataset_stats.csv (%s)", label)
 
         return stats
 
 
 if __name__ == "__main__":
-    data_loader = DataLoader()
-    data = data_loader.load_data()
-    stats = data_loader.analyze_dataset(data)
+    for clean_flag in [False, True]:
+        config.CLEAN_DATA = clean_flag
+        label = "clean" if clean_flag else "unclean"
+        print(f"\nProcessing {label} data...")
 
-    visualizer = TokenDataVisualizer()
-    visualizer.plot_token_distributions(
-        stats, save_path="plots/token_distributions.png"
-    )
-    visualizer.plot_statistics(stats, save_path="plots/statistical_comparison.png")
+        # Load and analyze data
+        data_loader = DataLoader()
+        data = data_loader.load_data(sample_size=1000)
+        stats = data_loader.analyze_dataset(data, label)
 
-    print("\nSample dialogue:", data["train"][0][0])
-    print("Sample summary:", data["train"][1][0])
-    print("\nTraining set statistics:", stats["train"])
+        # Save visualizations
+        visualizer = TokenDataVisualizer()
+        visualizer.plot_token_distributions(
+            stats, save_path=f"plots/{label}/{label}_token_distributions.png"
+        )
+        visualizer.plot_statistics(
+            stats, save_path=f"plots/{label}/{label}_statistical_comparison.png"
+        )
+
+        # Sample preview and stats
+        print(f"\nSample dialogue ({label}):", data["train"][0][0])
+        print(f"Sample summary ({label}):", data["train"][1][0])
+        print(f"\nTraining set statistics ({label}):", stats["train"])

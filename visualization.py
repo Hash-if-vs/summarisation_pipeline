@@ -56,7 +56,7 @@ class SummaryVisualizer:
 
         df = pd.DataFrame(examples_data)
 
-        output_file = f"results/qualitative_analysis.csv"
+        output_file = f"results/{data_type.lower()}_qualitative_analysis.csv"
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
         if os.path.exists(output_file):
