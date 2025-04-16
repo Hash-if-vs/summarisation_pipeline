@@ -10,3 +10,4 @@ py7zr==0.22.0
 spacy==3.8.5
 emoji==2.14.1
 contractions==0.1.73
+seaborn == 0.13.2
