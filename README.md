@@ -221,3 +221,7 @@ This project includes a custom fine-tuned BART model on the SAMSum dataset. The 
 -   **Comparative Analysis**: The pipeline is explicitly designed to compare multiple models and the effect of data cleaning, providing valuable insights through direct evaluation and visualization.
 -   **Reproducibility**: Storing results (CSV) and visualizations (plots) ensures that experiments can be documented and reproduced.
 
+## Acknowledgments
+
+This project has been developed with the assistance of AI tools such as **DeepSeek Chat** and **GenSpark** for documentation and code structuring. These tools have been instrumental in improving the clarity, organization, and overall quality of the project.
+
