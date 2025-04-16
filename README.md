@@ -93,7 +93,12 @@ The pipeline follows a clear sequence:
     pip install -r requirements.txt
     ```
 
-4.  **(Optional) Create `.env` file:** If your models require authentication or you use specific environment variables, create a `.env` file in the root directory:
+4.  **Install the `en_core_web_sm` model for spaCy (if required):**
+    ```bash
+    python -m spacy download en_core_web_sm
+    ```
+
+5.  **(Optional) Create `.env` file:** If your models require authentication or you use specific environment variables, create a `.env` file in the root directory:
     ```env
     # Example: If using private models
     # HUGGING_FACE_HUB_TOKEN=your_hf_token
@@ -130,6 +135,69 @@ The script will:
 -   Print final formatted results to the console.
 
 *Note: The `pipeline.run()` method in `main.py` currently uses a default `sample_size=500`. Modify this in `main.py` if you want to run on the full dataset (set to `None`) or a different sample size.*
+
+## Qualitative Analysis
+
+For a deeper qualitative analysis of the summarization models, a Jupyter Notebook is provided in the `notebooks/` directory. This notebook contains code to analyze and compare the generated summaries with the reference summaries in detail.
+
+### Running the Notebook
+
+1. Ensure you have installed all dependencies as mentioned in the [Setup](#setup) section.
+2. Navigate to the `notebooks/` directory:
+    ```bash
+    cd notebooks
+    ```
+3. Launch Jupyter Notebook:
+    ```bash
+    jupyter notebook
+    ```
+4. Open the qualitative analysis notebook and follow the instructions provided within the notebook.
+
+This notebook allows you to:
+- View example dialogue/summary pairs alongside generated summaries.
+- Perform a detailed comparison of the generated summaries for different models.
+
+## Dataset Analysis
+
+To analyze the dataset (e.g., token length distributions, data cleaning effects), run the `data_loader.py` script. This script generates plots and statistics to help understand the dataset better.
+
+### Running the Data Analysis
+
+Run the following command:
+```bash
+python data_loader.py
+```
+
+### Sample Outputs
+
+The script generates the following outputs in the `plots/` directory:
+- **Token Length Distributions**: `plots/token_distributions.png`
+- **Clean vs. Unclean Data Comparison**: Plots showing the effect of data cleaning.
+
+Example output:
+- **Token Length Distribution Plot**:
+  ![Token Length Distribution](plots/clean/clean_token_distributions.png)
+
+- **Clean vs. Unclean Data Comparison**:
+  ![Clean vs. Unclean Data](plots/clean_vs_unclean_model_performance_comparison.png)
+
+## Fine-Tuning a Custom BART Model
+
+This project includes a custom fine-tuned BART model on the SAMSum dataset. The fine-tuning process is provided in the Jupyter Notebook located in the `notebooks/` directory, named `finetune_summarisation.ipynb`. It is recommended to run this notebook in a Google Colab environment for ease of use and access to GPU resources.
+
+### Running the Fine-Tuning Notebook
+
+1. Open the `notebooks/finetune_summarisation.ipynb` file in Google Colab.
+2. Obtain your API token from [Hugging Face](https://huggingface.co/settings/tokens).
+3. Add the token to Colab secrets:
+    - In the Colab interface, go to the **Sidebar** on the left.
+    - Click on the **"Secrets"** tab.
+    - Add a new secret with the key `HF_TOKEN` and paste your Hugging Face API token as the value.
+4. Follow the instructions in the notebook to fine-tune the BART model on the SAMSum dataset.
+
+### Notes:
+- Ensure you have a Hugging Face account and API token to access the Hugging Face Hub.
+- The fine-tuned model can be saved to your Hugging Face account for later use in the pipeline.
 
 ## Design Choices
 
