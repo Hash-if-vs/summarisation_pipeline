@@ -8,6 +8,7 @@ class Config:
     # Model configuration
     MODEL_NAMES: List[str] = field(
         default_factory=lambda: [
+            "Hashif/bart-samsum",
             "philschmid/distilbart-cnn-12-6-samsum",
             "philschmid/bart-large-cnn-samsum",
             "sharmax-vikas/flan-t5-base-samsum",

@@ -5,6 +5,7 @@ from evaluator import SummarizationEvaluator
 from config import config
 import pandas as pd
 from visualization import SummaryVisualizer
+import os
 
 
 class SummarizationPipeline:
@@ -19,22 +20,48 @@ class SummarizationPipeline:
         self.model = SummarizationModel()
         self.evaluator = SummarizationEvaluator()
         self.visualizer = SummaryVisualizer()
+        self.results_filepath = "results/summarization_scores.csv"
 
-    def save_scores_to_csv(self, results, filepath):
-        flattened_results = []
+        # Initialize results file with header if it doesn't exist
+        if not os.path.exists(self.results_filepath):
+            os.makedirs(os.path.dirname(self.results_filepath), exist_ok=True)
+            pd.DataFrame(
+                columns=[
+                    "Data_Type",
+                    "Model_Name",
+                    "ROUGE1_P",
+                    "ROUGE1_R",
+                    "ROUGE1_F",
+                    "ROUGE2_P",
+                    "ROUGE2_R",
+                    "ROUGE2_F",
+                    "ROUGEL_P",
+                    "ROUGEL_R",
+                    "ROUGEL_F",
+                ]
+            ).to_csv(self.results_filepath, index=False)
 
-        for row in results:
-            flat_row = {"Data_Type": row["Data_Type"], "Model_Name": row["Model_Name"]}
-            for metric in ["rouge1", "rouge2", "rougeL"]:
-                score_dict = row.get(metric, {})
-                flat_row[f"{metric.upper()}_P"] = float(score_dict.get("precision", 0))
-                flat_row[f"{metric.upper()}_R"] = float(score_dict.get("recall", 0))
-                flat_row[f"{metric.upper()}_F"] = float(score_dict.get("fmeasure", 0))
-            flattened_results.append(flat_row)
+    def save_single_result(self, result_row):
+        """Save a single result row to the CSV file."""
+        flat_row = {
+            "Data_Type": result_row["Data_Type"],
+            "Model_Name": result_row["Model_Name"],
+            "ROUGE1_P": float(result_row.get("rouge1", {}).get("precision", 0)),
+            "ROUGE1_R": float(result_row.get("rouge1", {}).get("recall", 0)),
+            "ROUGE1_F": float(result_row.get("rouge1", {}).get("fmeasure", 0)),
+            "ROUGE2_P": float(result_row.get("rouge2", {}).get("precision", 0)),
+            "ROUGE2_R": float(result_row.get("rouge2", {}).get("recall", 0)),
+            "ROUGE2_F": float(result_row.get("rouge2", {}).get("fmeasure", 0)),
+            "ROUGEL_P": float(result_row.get("rougeL", {}).get("precision", 0)),
+            "ROUGEL_R": float(result_row.get("rougeL", {}).get("recall", 0)),
+            "ROUGEL_F": float(result_row.get("rougeL", {}).get("fmeasure", 0)),
+        }
 
-        df = pd.DataFrame(flattened_results)
-        df.to_csv(filepath, index=False)
-        self.logger.info(f"Saved flattened results to {filepath}")
+        df = pd.DataFrame([flat_row])
+        df.to_csv(self.results_filepath, mode="a", header=False, index=False)
+        self.logger.info(
+            f"Appended results for {result_row['Model_Name']} ({result_row['Data_Type']}) to {self.results_filepath}"
+        )
 
     def run(self, sample_size: int = None):
         self.logger.info("Starting summarization pipeline")
@@ -74,16 +101,18 @@ class SummarizationPipeline:
                 all_results.append(result_row)
                 grouped_scores[data_type].append(scores)
 
+                # Save results immediately after each model iteration
+                self.save_single_result(result_row)
+
             self.visualizer.plot_model_comparison(
                 grouped_scores[data_type],
                 config.MODEL_NAMES,
                 save_path=f"plots/{data_type.lower()}/model_comparison.png",
             )
 
-        # Save final combined results
-        self.save_scores_to_csv(all_results, "results/summarization_scores.csv")
+        # Final comparison plot
         self.visualizer.plot_clean_vs_unclean_comparison(
-            results_csv_path="results/summarization_scores.csv",
+            results_csv_path=self.results_filepath,
             save_path="plots/clean_vs_unclean_model_performance_comparison.png",
         )
 

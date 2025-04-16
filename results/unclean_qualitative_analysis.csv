@@ -1,19 +1,51 @@
 model,dialogue,reference_summary,generated_summary,data_type
-philschmid/distilbart-cnn-12-6-samsum,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well hannah amanda do not be shy he be very nice hannah if you say so hannah I would rather you texte he amanda just text he slightly_smiling_face hannah urgh alright hannah bye amanda bye bye,Hannah needs Betty's number but Amanda does not have it. She needs to contact Larry.,Amanda can't find betty's number. She will text him slightly_smiling_face to get her back from the park. ,Clean
-philschmid/distilbart-cnn-12-6-samsum,eric machine rob that be so gr8 eric I know and show how americans see russian rob and it be really funny eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob machine eric ttyl rob sure,Eric and Rob are going to watch a stand-up on youtube.,Rob is a stand-up comedian. Eric and Eric will watch some of his stand-ups on YouTube. They will watch them now. ,Clean
-philschmid/distilbart-cnn-12-6-samsum,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you will give you the most outfit option lenny so I guess I will buy the first or the third pair then bob pick the good quality then lenny you be right thank bob no prob,Lenny cannot decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality.,Bob will buy the first or the third pair of trousers for lenny. He will pick the good quality and buy the second pair.,Clean
-philschmid/bart-large-cnn-samsum,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well hannah amanda do not be shy he be very nice hannah if you say so hannah I would rather you texte he amanda just text he slightly_smiling_face hannah urgh alright hannah bye amanda bye bye,Hannah needs Betty's number but Amanda does not have it. She needs to contact Larry.,Amanda can't find Betty's number. She will text Betty to Hannah instead.   Hannah and Betty were at the park together.,Clean
-philschmid/bart-large-cnn-samsum,eric machine rob that be so gr8 eric I know and show how americans see russian rob and it be really funny eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob machine eric ttyl rob sure,Eric and Rob are going to watch a stand-up on youtube.,Rob is a stand-up comedian. Some of his stand-ups can be found on youtube. Eric and Toby will watch some of them.,Clean
-philschmid/bart-large-cnn-samsum,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you will give you the most outfit option lenny so I guess I will buy the first or the third pair then bob pick the good quality then lenny you be right thank bob no prob,Lenny cannot decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality., bob will buy the first or the third pair of good quality trouser for lenny. He already has four black trouser. ,Clean
-sharmax-vikas/flan-t5-base-samsum,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well hannah amanda do not be shy he be very nice hannah if you say so hannah I would rather you texte he amanda just text he slightly_smiling_face hannah urgh alright hannah bye amanda bye bye,Hannah needs Betty's number but Amanda does not have it. She needs to contact Larry.,"hannah can't find Betty 's number. he called her last time they were at the park together. if she says so, he will text her. ",Clean
-sharmax-vikas/flan-t5-base-samsum,eric machine rob that be so gr8 eric I know and show how americans see russian rob and it be really funny eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob machine eric ttyl rob sure,Eric and Rob are going to watch a stand-up on youtube.,eric machine rob ttyl rob sure i will watch they now rob me too i'll watch them now,Clean
-sharmax-vikas/flan-t5-base-samsum,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you will give you the most outfit option lenny so I guess I will buy the first or the third pair then bob pick the good quality then lenny you be right thank bob no prob,Lenny cannot decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality.,lenny wants to buy a pair of purple trouser but he already has purple trousers. bob will help him.,Clean
-google/flan-t5-base,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well hannah amanda do not be shy he be very nice hannah if you say so hannah I would rather you texte he amanda just text he slightly_smiling_face hannah urgh alright hannah bye amanda bye bye,Hannah needs Betty's number but Amanda does not have it. She needs to contact Larry.,hannah can not find betty 's number amanda ask larry if he call her last time we be at the park together,Clean
-google/flan-t5-base,eric machine rob that be so gr8 eric I know and show how americans see russian rob and it be really funny eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob machine eric ttyl rob sure,Eric and Rob are going to watch a stand-up on youtube.,eric machine rob ttyl rob sure i'm gonna watch youtube rob turn out na there be some of his stand up on youtube,Clean
-google/flan-t5-base,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you will give you the most outfit option lenny so I guess I will buy the first or the third pair then bob pick the good quality then lenny you be right thank bob no prob,Lenny cannot decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality.,lenny babe can you help me with something bob send me a photo bob i like the first one but i already have purple trouser do it make sense to have two pair bob,Clean
-facebook/bart-large,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well hannah amanda do not be shy he be very nice hannah if you say so hannah I would rather you texte he amanda just text he slightly_smiling_face hannah urgh alright hannah bye amanda bye bye,Hannah needs Betty's number but Amanda does not have it. She needs to contact Larry.,hannah hey do you have betty 's number amanda let I check hannah amanda sorry can not find it amanda ask larry amanda he call she last time we be at the park together hannah I do not know he well h Hannah amanda do not be shy he be very nice hannah if you say so h Hannah I would rather you texte he,Clean
-facebook/bart-large,eric machine rob that be so gr8 eric I know and show how americans see russian rob and it be really funny eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob machine eric ttyl rob sure,Eric and Rob are going to watch a stand-up on youtube.,eric machine rob that be so gr8 eric I know I especially like the train part rob hahaha no one talk to the machine like that eric be this his only stand up rob I do not know I will check eric sure rob turn out no there be some of his stand up on youtube eric gr8 I will watch they now rob I too eric machine rob,Clean
-facebook/bart-large,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you will give you the most outfit option lenny so I guess I will buy the first or the third pair then bob pick the good quality then lenny you be right thank bob no prob,Lenny cannot decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality.,lenny babe can you help I with something bob sure what be up lenny which one should I pick bob send I photo lenny lenny bob I like the first one well lenny but I already have purple trouser do it make sense to have two pair bob I have four black pair d d lenny yeah but should not I pick a different color bob what matter be what you,Clean
+Hashif/bart-samsum,"Hannah: Hey, do you have Betty's number?
+Amanda: Lemme check
+Hannah: <file_gif>
+Amanda: Sorry, can't find it.
+Amanda: Ask Larry
+Amanda: He called her last time we were at the park together
+Hannah: I don't know him well
+Hannah: <file_gif>
+Amanda: Don't be shy, he's very nice
+Hannah: If you say so..
+Hannah: I'd rather you texted him
+Amanda: Just text him 🙂
+Hannah: Urgh.. Alright
+Hannah: Bye
+Amanda: Bye bye",Hannah needs Betty's number but Amanda doesn't have it. She needs to contact Larry.,"Hannah asks Amanda for Betty's number. Amanda cannot find it. Hannah suggests asking Larry, who called Betty the last time they were at the park together.",Unclean
+Hashif/bart-samsum,"Eric: MACHINE!
+Rob: That's so gr8!
+Eric: I know! And shows how Americans see Russian ;)
+Rob: And it's really funny!
+Eric: I know! I especially like the train part!
+Rob: Hahaha! No one talks to the machine like that!
+Eric: Is this his only stand-up?
+Rob: Idk. I'll check.
+Eric: Sure.
+Rob: Turns out no! There are some of his stand-ups on youtube.
+Eric: Gr8! I'll watch them now!
+Rob: Me too!
+Eric: MACHINE!
+Rob: MACHINE!
+Eric: TTYL?
+Rob: Sure :)",Eric and Rob are going to watch a stand-up on youtube.,Eric and Rob are watching a Russian comedian's stand-up. They like the train part. There are some of his stand-ups on youtube.,Unclean
+Hashif/bart-samsum,"Lenny: Babe, can you help me with something?
+Bob: Sure, what's up?
+Lenny: Which one should I pick?
+Bob: Send me photos
+Lenny:  <file_photo>
+Lenny:  <file_photo>
+Lenny:  <file_photo>
+Bob: I like the first ones best
+Lenny: But I already have purple trousers. Does it make sense to have two pairs?
+Bob: I have four black pairs :D :D
+Lenny: yeah, but shouldn't I pick a different color?
+Bob: what matters is what you'll give you the most outfit options
+Lenny: So I guess I'll buy the first or the third pair then
+Bob: Pick the best quality then
+Lenny: ur right, thx
+Bob: no prob :)",Lenny can't decide which trousers to buy. Bob advised Lenny on that topic. Lenny goes with Bob's advice to pick the trousers that are of best quality.,Lenny will buy the first or the third pair of purple trousers for Bob. He already has four black trousers. He will choose the one with the best quality.,Unclean
 philschmid/distilbart-cnn-12-6-samsum,"Hannah: Hey, do you have Betty's number?
 Amanda: Lemme check
 Hannah: <file_gif>
