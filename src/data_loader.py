@@ -1,17 +1,25 @@
-from dotenv import load_dotenv
-
-load_dotenv()
-from datasets import load_dataset
-from typing import Dict, Tuple, Any, List
 import logging
-import numpy as np
-from collections import Counter
-from transformers import AutoTokenizer
-from config import config
-from data_cleaner import DataCleaner
-from visualization import TokenDataVisualizer
-import pandas as pd
 import os
+from collections import Counter
+from typing import Dict, Tuple, Any, List
+import sys
+
+# Third-party imports
+import numpy as np
+import pandas as pd
+from datasets import load_dataset
+from dotenv import load_dotenv
+from transformers import AutoTokenizer
+
+# Local application imports
+print(f"Attempting imports from {__name__} located at {__file__}")
+print(f"Current sys.path: {sys.path}")
+from config.config import config
+from .data_cleaner import DataCleaner
+from .visualization import TokenDataVisualizer
+
+# Load environment variables BEFORE using them (e.g., in config)
+load_dotenv()
 
 
 class DataLoader:
@@ -22,11 +30,13 @@ class DataLoader:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(config.LOG_LEVEL)
+        self.analytics_file_path=
         self.cleaner = DataCleaner() if config.CLEAN_DATA else None
         if config.CLEAN_DATA:
             self.logger.info("Data cleaning enabled")
         else:
             self.logger.info("Data cleaning disabled")
+        
 
     def load_data(self, sample_size: int = None) -> Dict[str, Tuple]:
         """

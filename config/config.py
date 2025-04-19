@@ -6,7 +6,7 @@ from typing import List
 @dataclass
 class Config:
     # Model configuration
-    MODEL_NAMES: List[str] = field(
+    model_names: List[str] = field(
         default_factory=lambda: [
             "Hashif/bart-samsum",
             "philschmid/distilbart-cnn-12-6-samsum",
@@ -16,30 +16,30 @@ class Config:
             "facebook/bart-large",
         ]
     )
-    SELECTED_MODEL_INDEX: int = 0
-    MAX_INPUT_LENGTH: int = 800
-    MAX_OUTPUT_LENGTH: int = 81
-    NUM_BEAMS: int = 4
+    selected_model_index: int = 0
+    max_input_length: int = 800
+    max_output_length: int = 81
+    num_beams: int = 4
 
     # Data configuration
-    DATASET_NAME: str = "Samsung/samsum"
-    TEST_SPLIT_SIZE: float = 0.2
-    RANDOM_SEED: int = 42
+    dataset_name: str = "Samsung/samsum"
+    test_split_size: float = 0.2
+    random_seed: int = 42
 
     # Evaluation configuration
-    METRICS: List[str] = field(default_factory=lambda: ["rouge1", "rouge2", "rougeL"])
+    metrics: List[str] = field(default_factory=lambda: ["rouge1", "rouge2", "rougeL"])
 
     # Logging configuration
-    LOG_LEVEL: int = logging.INFO
-    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    log_level: int = logging.INFO
+    log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-    CLEAN_DATA: bool = True  # Set to False to disable cleaning
+    clean_data: bool = True  # Set to False to disable cleaning
 
     # This will be set in __post_init__
-    MODEL_NAME: str = ""
+    model_name: str = ""
 
     def __post_init__(self):
-        self.MODEL_NAME = self.MODEL_NAMES[self.SELECTED_MODEL_INDEX]
+        self.model_name = self.model_names[self.selected_model_index]
 
 
 config = Config()
