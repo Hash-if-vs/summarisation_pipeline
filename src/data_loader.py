@@ -1,25 +1,25 @@
+"""
+Module for loading, preparing and analyzing summarization datasets.
+This module provides functionality to load datasets from various sources,
+clean the data if needed, and perform statistical analysis.
+"""
+
 import logging
 import os
 from collections import Counter
 from typing import Dict, Tuple, Any, List
-import sys
 
 # Third-party imports
 import numpy as np
 import pandas as pd
 from datasets import load_dataset
-from dotenv import load_dotenv
 from transformers import AutoTokenizer
 
+
 # Local application imports
-print(f"Attempting imports from {__name__} located at {__file__}")
-print(f"Current sys.path: {sys.path}")
-from config.config import config
+from config import config
 from .data_cleaner import DataCleaner
 from .visualization import TokenDataVisualizer
-
-# Load environment variables BEFORE using them (e.g., in config)
-load_dotenv()
 
 
 class DataLoader:
@@ -55,7 +55,7 @@ class DataLoader:
 
             # If sample_size is provided, load only the subset of the data
             if sample_size:
-                data = {
+                dataset_data = {
                     "train": (
                         dataset["train"]["dialogue"][:sample_size],
                         dataset["train"]["summary"][:sample_size],
@@ -67,7 +67,7 @@ class DataLoader:
                 }
             else:
                 # Load full dataset if no sample size is provided
-                data = {
+                dataset_data = {
                     "train": (
                         dataset["train"]["dialogue"],
                         dataset["train"]["summary"],
@@ -77,16 +77,18 @@ class DataLoader:
 
             self.logger.info(
                 "Dataset loaded successfully. Train samples: %d, Test samples: %d",
-                len(data["train"][0]),
-                len(data["test"][0]),
+                len(dataset_data["train"][0]),
+                len(dataset_data["test"][0]),
             )
 
             # Optionally clean the data
             if config.clean_data:
-                data["train"] = self.cleaner.clean_dataset(data["train"])
-                data["test"] = self.cleaner.clean_dataset(data["test"])
+                dataset_data["train"] = self.cleaner.clean_dataset(
+                    dataset_data["train"]
+                )
+                dataset_data["test"] = self.cleaner.clean_dataset(dataset_data["test"])
 
-            return data
+            return dataset_data
 
         except Exception as e:
             self.logger.error("Failed to load dataset: %s", str(e))
@@ -95,25 +97,35 @@ class DataLoader:
     def clean_subset(
         self, dialogues: List[str], summaries: List[str]
     ) -> Tuple[List[str], List[str]]:
+        """
+        Clean a subset of dialogues and summaries using the DataCleaner.
+
+        Args:
+            dialogues: List of dialogue texts to clean
+            summaries: List of summary texts to clean
+
+        Returns:
+            Tuple of cleaned dialogues and summaries
+        """
         if not self.cleaner:
             return dialogues, summaries
         self.logger.info("Cleaning sample of size %d", len(dialogues))
         return self.cleaner.clean_dataset((dialogues, summaries))
 
     def analyze_dataset(
-        self, data: Dict[str, Tuple], label: str
+        self, dataset_data: Dict[str, Tuple], data_label: str
     ) -> Dict[str, Dict[str, Any]]:
         """
         Analyze token length distribution of the dataset and save statistics to a shared CSV file.
         """
-        self.logger.info("Analyzing dataset token distribution (%s)", label)
+        self.logger.info("Analyzing dataset token distribution (%s)", data_label)
         tokenizer = AutoTokenizer.from_pretrained(config.model_name)
 
-        stats = {}
+        dataset_stats = {}
         rows = []
 
         for split in ["train", "test"]:
-            dialogues, summaries = data[split]
+            dialogues, summaries = dataset_data[split]
 
             # Tokenize and compute lengths
             dialogue_lengths = [len(tokenizer.tokenize(d)) for d in dialogues]
@@ -139,7 +151,7 @@ class DataLoader:
                 "values": summary_lengths,
             }
 
-            stats[split] = {
+            dataset_stats[split] = {
                 "dialogues": dialogue_stats,
                 "summaries": summary_stats,
             }
@@ -147,7 +159,7 @@ class DataLoader:
             # Add to CSV row format with label
             rows.append(
                 [
-                    label,
+                    data_label,
                     split,
                     "dialogues",
                     dialogue_stats["mean"],
@@ -160,7 +172,7 @@ class DataLoader:
             )
             rows.append(
                 [
-                    label,
+                    data_label,
                     split,
                     "summaries",
                     summary_stats["mean"],
@@ -177,7 +189,7 @@ class DataLoader:
                 "Dialogues - Mean: %.1f, Median: %d, Mode: %d\n"
                 "Summaries - Mean: %.1f, Median: %d, Mode: %d",
                 split.capitalize(),
-                label,
+                data_label,
                 dialogue_stats["mean"],
                 dialogue_stats["median"],
                 dialogue_stats["mode"],
@@ -212,53 +224,55 @@ class DataLoader:
         else:
             df.to_csv(self.dataset_stats_path, index=False)  # create new with header
 
-        self.logger.info("Saved token stats to %s (%s)", self.dataset_stats_path, label)
+        self.logger.info(
+            "Saved token stats to %s (%s)", self.dataset_stats_path, data_label
+        )
 
-        return stats
+        return dataset_stats
 
-    def get_visualization_path(self, label: str, filename: str) -> str:
+    def get_visualization_path(self, data_label: str, filename: str) -> str:
         """
         Generate a proper path for visualization files based on configuration.
 
         Args:
-            label: The data type label (e.g., 'clean', 'unclean')
+            data_label: The data type label (e.g., 'clean', 'unclean')
             filename: The name of the file to save
 
         Returns:
             Complete file path for saving visualizations
         """
         return os.path.join(
-            config.file_save_paths["text_analysis_plots"], label, filename
+            config.file_save_paths["text_analysis_plots"], data_label, filename
         )
 
 
 if __name__ == "__main__":
     for clean_flag in [False, True]:
         config.clean_data = clean_flag
-        label = "clean" if clean_flag else "unclean"
-        print(f"\nProcessing {label} data...")
+        DATA_LABEL = "clean" if clean_flag else "unclean"
+        print(f"\nProcessing {DATA_LABEL} data...")
 
         # Load and analyze data
         data_loader = DataLoader()
-        data = data_loader.load_data(sample_size=1000)
-        stats = data_loader.analyze_dataset(data, label)
+        loaded_data = data_loader.load_data(sample_size=1000)
+        analysis_stats = data_loader.analyze_dataset(loaded_data, DATA_LABEL)
 
         # Save visualizations
         visualizer = TokenDataVisualizer()
         visualizer.plot_token_distributions(
-            stats,
+            analysis_stats,
             save_path=data_loader.get_visualization_path(
-                label, data_loader.token_dist_filename
+                DATA_LABEL, data_loader.token_dist_filename
             ),
         )
         visualizer.plot_statistics(
-            stats,
+            analysis_stats,
             save_path=data_loader.get_visualization_path(
-                label, data_loader.stats_comp_filename
+                DATA_LABEL, data_loader.stats_comp_filename
             ),
         )
 
         # Sample preview and stats
-        print(f"\nSample dialogue ({label}):", data["train"][0][0])
-        print(f"Sample summary ({label}):", data["train"][1][0])
-        print(f"\nTraining set statistics ({label}):", stats["train"])
+        print(f"\nSample dialogue ({DATA_LABEL}):", loaded_data["train"][0][0])
+        print(f"Sample summary ({DATA_LABEL}):", loaded_data["train"][1][0])
+        print(f"\nTraining set statistics ({DATA_LABEL}):", analysis_stats["train"])

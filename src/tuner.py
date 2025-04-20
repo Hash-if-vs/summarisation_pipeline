@@ -1,9 +1,12 @@
+"""Hyper parameter tuning module"""
+
 import itertools
 import logging
 from typing import Dict, Any
-from model import SummarizationModel
-from evaluator import SummarizationEvaluator
 from config import config
+
+from .model import SummarizationModel
+from .evaluator import SummarizationEvaluator
 
 
 class HyperparameterTuner:
@@ -13,7 +16,7 @@ class HyperparameterTuner:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config.LOG_LEVEL)
+        self.logger.setLevel(config.log_level)
         self.model = SummarizationModel()
         self.evaluator = SummarizationEvaluator()
 

@@ -1,11 +1,13 @@
+"""Main script"""
+
 import logging
-from pipeline import SummarizationPipeline
 from config import config
+from .pipeline import SummarizationPipeline
 
 
 def setup_logging():
     """Configure logging for the application."""
-    logging.basicConfig(level=config.LOG_LEVEL, format=config.LOG_FORMAT)
+    logging.basicConfig(level=config.log_level, format=config.log_format)
 
 
 def print_results(results):

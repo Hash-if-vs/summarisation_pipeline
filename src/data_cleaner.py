@@ -7,7 +7,7 @@ from typing import List, Tuple
 import emoji
 import spacy
 from contractions import fix
-from config.config import config
+from config import config
 
 
 class DataCleaner:
