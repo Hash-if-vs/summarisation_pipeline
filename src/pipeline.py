@@ -116,7 +116,7 @@ class SummarizationPipeline:
 
                 # Visualizations
                 self.visualizer.display_examples(
-                    dialogues, summaries, generated, data_type, sample_size
+                    (dialogues, summaries, generated), data_type, sample_size
                 )
                 result_row = {
                     "Data_Type": data_type,

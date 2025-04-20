@@ -64,8 +64,11 @@ class SummaryVisualizer:
             )
 
         df = pd.DataFrame(examples_data)
-
-        output_file = f"results/{data_type.lower()}_qualitative_analysis.csv"
+        base_path = config.file_save_paths["generated_summaries"]
+        output_file = os.path.join(
+            base_path,
+            f"{data_type.lower()}_summaries.csv",
+        )
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
         if os.path.exists(output_file):
