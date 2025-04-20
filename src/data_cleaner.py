@@ -27,7 +27,6 @@ class DataCleaner:
                 "Spacy model 'en_core_web_sm' not found. "
                 "Download it by running 'python -m spacy download en_core_web_sm'"
             )
-            # Depending on requirements, could raise an error instead
 
     def clean_dialogue(self, dialogue: str) -> str:
         """

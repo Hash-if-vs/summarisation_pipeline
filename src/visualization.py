@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Dict, List, Any, Optional
 import logging
-from config import config
+from config.config import config
 import pandas as pd
 import os
 
@@ -18,7 +18,7 @@ class SummaryVisualizer:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config.LOG_LEVEL)
+        self.logger.setLevel(config.log_level)
 
     @staticmethod
     def display_examples(
@@ -46,7 +46,7 @@ class SummaryVisualizer:
                 print("=" * 80)
             examples_data.append(
                 {
-                    "model": config.MODEL_NAME,
+                    "model": config.model_name,
                     "dialogue": dialogues[i],
                     "reference_summary": references[i],
                     "generated_summary": predictions[i],
@@ -223,7 +223,7 @@ class TokenDataVisualizer:
 
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.TokenDataVisualizer")
-        self.logger.setLevel(config.LOG_LEVEL)
+        self.logger.setLevel(config.log_level)
         self.color_palette = {
             "train": {"dialogues": "#1f77b4", "summaries": "#2ca02c"},
             "test": {"dialogues": "#ff7f0e", "summaries": "#d62728"},

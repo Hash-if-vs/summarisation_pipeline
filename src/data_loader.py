@@ -29,23 +29,29 @@ class DataLoader:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(config.LOG_LEVEL)
-        self.analytics_file_path=
-        self.cleaner = DataCleaner() if config.CLEAN_DATA else None
-        if config.CLEAN_DATA:
+        self.logger.setLevel(config.log_level)
+        self.cleaner = DataCleaner() if config.clean_data else None
+
+        # File paths and names
+        self.dataset_stats_path = os.path.join(
+            config.file_save_paths["text_statistics"], "dataset_stats.csv"
+        )
+        self.token_dist_filename = "token_distributions.png"
+        self.stats_comp_filename = "statistical_comparison.png"
+
+        if config.clean_data:
             self.logger.info("Data cleaning enabled")
         else:
             self.logger.info("Data cleaning disabled")
-        
 
     def load_data(self, sample_size: int = None) -> Dict[str, Tuple]:
         """
         Load and optionally clean a subset of the dataset based on the provided sample size.
         """
-        self.logger.info("Loading dataset: %s", config.DATASET_NAME)
+        self.logger.info("Loading dataset: %s", config.dataset_name)
 
         try:
-            dataset = load_dataset(config.DATASET_NAME, trust_remote_code=True)
+            dataset = load_dataset(config.dataset_name, trust_remote_code=True)
 
             # If sample_size is provided, load only the subset of the data
             if sample_size:
@@ -76,7 +82,7 @@ class DataLoader:
             )
 
             # Optionally clean the data
-            if config.CLEAN_DATA:
+            if config.clean_data:
                 data["train"] = self.cleaner.clean_dataset(data["train"])
                 data["test"] = self.cleaner.clean_dataset(data["test"])
 
@@ -101,7 +107,7 @@ class DataLoader:
         Analyze token length distribution of the dataset and save statistics to a shared CSV file.
         """
         self.logger.info("Analyzing dataset token distribution (%s)", label)
-        tokenizer = AutoTokenizer.from_pretrained(config.MODEL_NAME)
+        tokenizer = AutoTokenizer.from_pretrained(config.model_name)
 
         stats = {}
         rows = []
@@ -195,22 +201,40 @@ class DataLoader:
                 "Std Dev",
             ],
         )
-        csv_path = "results/dataset_stats.csv"
-        if os.path.exists(csv_path):
+
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(self.dataset_stats_path), exist_ok=True)
+
+        if os.path.exists(self.dataset_stats_path):
             df.to_csv(
-                csv_path, mode="a", index=False, header=False
+                self.dataset_stats_path, mode="a", index=False, header=False
             )  # append without header
         else:
-            df.to_csv(csv_path, index=False)  # create new with header
+            df.to_csv(self.dataset_stats_path, index=False)  # create new with header
 
-        self.logger.info("Saved token stats to dataset_stats.csv (%s)", label)
+        self.logger.info("Saved token stats to %s (%s)", self.dataset_stats_path, label)
 
         return stats
+
+    def get_visualization_path(self, label: str, filename: str) -> str:
+        """
+        Generate a proper path for visualization files based on configuration.
+
+        Args:
+            label: The data type label (e.g., 'clean', 'unclean')
+            filename: The name of the file to save
+
+        Returns:
+            Complete file path for saving visualizations
+        """
+        return os.path.join(
+            config.file_save_paths["text_analysis_plots"], label, filename
+        )
 
 
 if __name__ == "__main__":
     for clean_flag in [False, True]:
-        config.CLEAN_DATA = clean_flag
+        config.clean_data = clean_flag
         label = "clean" if clean_flag else "unclean"
         print(f"\nProcessing {label} data...")
 
@@ -222,10 +246,16 @@ if __name__ == "__main__":
         # Save visualizations
         visualizer = TokenDataVisualizer()
         visualizer.plot_token_distributions(
-            stats, save_path=f"plots/{label}/{label}_token_distributions.png"
+            stats,
+            save_path=data_loader.get_visualization_path(
+                label, data_loader.token_dist_filename
+            ),
         )
         visualizer.plot_statistics(
-            stats, save_path=f"plots/{label}/{label}_statistical_comparison.png"
+            stats,
+            save_path=data_loader.get_visualization_path(
+                label, data_loader.stats_comp_filename
+            ),
         )
 
         # Sample preview and stats
